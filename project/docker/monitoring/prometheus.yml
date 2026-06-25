@@ -23,7 +23,7 @@ scrape_configs:
 
   - job_name: 'spark'
     static_configs:
-      - targets: ['spark-master:8080']
+      - targets: ['spark-master:18080']
     metrics_path: '/metrics'
 
   - job_name: 'flink'

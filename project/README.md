@@ -45,8 +45,8 @@ python scripts/run_all_etl.py
 | 服务 | 地址 | 说明 |
 |------|------|------|
 | Streamlit | http://localhost:8501 | 数据看板 |
-| Airflow | http://localhost:8080 | ETL 调度 |
-| Spark UI | http://localhost:8083 | 作业监控 |
+| Airflow | http://localhost:8180 | ETL 调度 |
+| Spark UI | http://localhost:18080 | 作业监控 |
 | Grafana | http://localhost:3000 | 监控可视化 |
 | MinIO | http://localhost:9001 | 数据湖管理 |
 

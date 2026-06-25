@@ -191,29 +191,27 @@ services:
 
   # ── Spark ──────────────────────────────────────────────────
   spark-master:
-    image: bitnami/spark:3.5
+    image: apache/spark:3.5.0
     container_name: fin_spark_master
     ports:
-      - "8080:8080"   # Spark Master UI
+      - "18080:8080"   # Spark Master UI
       - "7077:7077"   # Spark Master RPC
     environment:
       SPARK_MODE: master
       SPARK_MASTER_HOST: spark-master
-    volumes:
-      - spark_data:/bitnami/spark
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
 
   spark-worker:
-    image: bitnami/spark:3.5
+    image: apache/spark:3.5.0
     container_name: fin_spark_worker
     environment:
       SPARK_MODE: worker
       SPARK_MASTER_URL: spark://spark-master:7077
       SPARK_WORKER_MEMORY: 2g
       SPARK_WORKER_CORES: 2
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     depends_on:
       - spark-master
-    volumes:
-      - spark_data:/bitnami/spark
 
   # ── Jupyter (Delta Lake 交互查询) ─────────────────────────
   jupyter:
