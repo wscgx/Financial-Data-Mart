@@ -9,6 +9,7 @@ from dashboards.option_b import render_option_b
 from dashboards.option_c import render_option_c
 from dashboards.option_d import render_option_d
 from dashboards.option_e import render_option_e
+from dashboards.lineage import render_lineage
 
 st.set_page_config(page_title="AI智能财富分析平台", page_icon="📊", layout="wide")
 
@@ -23,6 +24,7 @@ dashboard = st.sidebar.radio("选择看板", [
     "选项C: 客户风险匹配度",
     "选项D: 客户交易行为",
     "选项E: 综合财富管理驾驶舱",
+    "数据血缘图",
     "运维工具",
 ])
 
@@ -49,6 +51,9 @@ elif dashboard == "选项D: 客户交易行为":
     render_option_d()
 elif dashboard == "选项E: 综合财富管理驾驶舱":
     render_option_e()
+
+elif dashboard == "数据血缘图":
+    render_lineage()
 
 elif dashboard == "运维工具":
     st.title("🔧 运维工具")
@@ -160,7 +165,10 @@ elif dashboard == "运维工具":
                 "fin_flink_jobmanager": "8081",
                 "fin_flink_taskmanager": "-",
                 "fin_schema_registry": "8081",
-                "fin_airflow_webserver": "8080",
+                "fin_spark_master": "18080",
+                "fin_spark_worker": "-",
+                "fin_jupyter": "8888",
+                "fin_airflow_webserver": "8180",
                 "fin_airflow_scheduler": "-",
                 "fin_airflow_init": "-",
             }
@@ -191,11 +199,11 @@ elif dashboard == "运维工具":
             {"name": "Grafana 监控", "url": "http://localhost:3000", "port": "3000", "icon": "📊"},
             {"name": "Prometheus 指标", "url": "http://localhost:9090", "port": "9090", "icon": "📈"},
             {"name": "MinIO 控制台", "url": "http://localhost:9001", "port": "9001", "icon": "🪣"},
-            {"name": "MinIO API", "url": "http://localhost:9000", "port": "9000", "icon": "🔗"},
+            {"name": "Spark Master UI", "url": "http://localhost:18080", "port": "18080", "icon": "⚡"},
+            {"name": "Jupyter Notebook", "url": "http://localhost:8888", "port": "8888", "icon": "📓"},
+            {"name": "Airflow Webserver", "url": "http://localhost:8180", "port": "8180", "icon": "🌊"},
             {"name": "MySQL 数据库", "url": "localhost:3307", "port": "3307", "icon": "🗄️"},
             {"name": "Kafka Broker", "url": "localhost:9092", "port": "9092", "icon": "📨"},
-            {"name": "Flink Web UI", "url": "http://localhost:8082", "port": "8082", "icon": "⚡"},
-            {"name": "Airflow Webserver", "url": "http://localhost:8180", "port": "8180", "icon": "🌊"},
         ]
 
         # 使用 st.columns 布局，每行4个
@@ -249,23 +257,77 @@ elif dashboard == "运维工具":
 
     st.divider()
 
-    # ── 质量校验 ─────────────────────────────────────────────
-    st.subheader("数据质量校验")
-    if st.button("▶ 执行质量校验", key='run_quality'):
-        with st.spinner("质量校验中..."):
-            cmd = [sys.executable, os.path.join(SCRIPTS_DIR, 'run_quality_validation.py')]
-            code, stdout, stderr = run_cmd(cmd)
-        if code == 0:
-            st.success("质量校验完成")
-        else:
-            st.error(f"质量校验失败 (exit {code})")
-        with st.expander("校验日志", expanded=code != 0):
-            st.code(stdout + stderr, language='text')
+    # ── 数据质量校验 ─────────────────────────────────────────
+    st.subheader("📋 数据质量校验")
+    st.caption("对数仓各层表进行完整性、唯一性、一致性、时效性校验")
+
+    qual_col1, qual_col2 = st.columns(2)
+
+    with qual_col1:
+        if st.button("▶ 执行质量校验", type="primary", key='run_quality'):
+            with st.spinner("质量校验中..."):
+                cmd = [sys.executable, os.path.join(os.path.dirname(__file__), 'data_quality', 'run_validation.py')]
+                code, stdout, stderr = run_cmd(cmd)
+            if code == 0:
+                st.success("质量校验完成！校验报告已保存到 data/quality_reports/")
+            else:
+                st.error(f"质量校验失败 (exit {code})")
+            with st.expander("校验日志", expanded=code != 0):
+                st.code(stdout + stderr, language='text')
+
+    with qual_col2:
+        if st.button("📂 查看最新报告", key='view_quality_report'):
+            report_dir = os.path.join(os.path.dirname(__file__), 'data', 'quality_reports')
+            latest_report = os.path.join(report_dir, 'quality_report_latest.csv')
+            if os.path.exists(latest_report):
+                import csv
+                with open(latest_report, 'r', encoding='utf-8-sig') as f:
+                    reader = csv.DictReader(f)
+                    rows = list(reader)
+                if rows:
+                    st.dataframe(rows, use_container_width=True)
+                else:
+                    st.info("报告为空")
+            else:
+                st.warning("暂无校验报告，请先执行质量校验")
+
+    st.divider()
+
+    # ── Delta Lake 性能优化 ──────────────────────────────────
+    st.subheader("⚡ Delta Lake 性能优化")
+    st.caption("Z-Order 索引优化 + 旧版本清理，提升查询性能")
+
+    opt_col1, opt_col2 = st.columns(2)
+
+    with opt_col1:
+        if st.button("▶ 执行性能优化", type="primary", key='run_optimize'):
+            with st.spinner("Delta Lake 优化中..."):
+                cmd = [sys.executable, os.path.join(os.path.dirname(__file__), 'scripts', 'optimize_delta_tables.py')]
+                code, stdout, stderr = run_cmd(cmd)
+            if code == 0:
+                st.success("性能优化完成！")
+            else:
+                st.error(f"优化失败 (exit {code})")
+            with st.expander("优化日志", expanded=code != 0):
+                st.code(stdout + stderr, language='text')
+
+    with opt_col2:
+        st.markdown("""
+        **优化内容:**
+        - Z-Order 索引：加速常用查询
+        - 版本清理：释放 MinIO 存储空间
+        
+        **覆盖表:**
+        - ODS: ods_customer, ods_transaction
+        - DWD: dwd_customer_asset_daily
+        - DWS: dws_customer_value_profile
+        - ADS: ads_executive_dashboard, ads_customer_aum_daily
+        """)
 
     st.divider()
 
     # ── 单元测试 ─────────────────────────────────────────────
-    st.subheader("单元测试")
+    st.subheader("🧪 单元测试")
     if st.button("▶ 运行测试", key='run_tests'):
         with st.spinner("测试执行中..."):
             cmd = [sys.executable, '-m', 'unittest', 'discover',
