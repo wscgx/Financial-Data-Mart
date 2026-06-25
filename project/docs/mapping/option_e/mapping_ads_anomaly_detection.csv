@@ -1,0 +1,28 @@
+字段,值
+需求名称,综合财富管理驾驶舱
+需求标识,option_e
+表名,ads_anomaly_detection
+中文表名,异常检测预警表
+层级,ADS
+创建日期,2026-06-11
+
+字段名,数据类型,中文注释,是否主键,是否可空,默认值,计算逻辑
+stat_date,VARCHAR(20),统计日期,是,否,,
+anomaly_type,VARCHAR(50),异常类型,是,否,,aum_fluctuation/transaction_anomaly/churn_anomaly
+anomaly_level,VARCHAR(20),异常级别,否,否,,low/medium/high
+description,TEXT,异常描述,否,是,,异常详细说明
+current_value,DECIMAL(18;2),当前值,否,是,,实际观测值
+expected_value,DECIMAL(18;2),预期值,否,是,,历史均值或预期值
+deviation_rate,DECIMAL(5;4),偏差率,否,是,,(current_value - expected_value) / expected_value
+affected_customers,INT,受影响客户数,否,是,,异常涉及的客户数
+affected_amount,DECIMAL(18;2),受影响金额,否,是,,异常涉及的金额
+dm_src_info,VARCHAR(100),数据来源表,否,否,,'dws_platform_daily_summary'
+etl_load_time,DATETIME,ETL加载时间,否,否,,NOW()
+
+加工逻辑项,说明
+数据来源,dws_platform_daily_summary
+关联条件,无
+过滤条件,偏差率超过阈值(20%/50%/100%)
+聚合粒度,stat_date + anomaly_type
+更新策略,"全量刷新，日频"
+ETL脚本,etl/etl_ads_anomaly_detection.sql

@@ -1,0 +1,29 @@
+字段,值
+需求名称,综合财富管理驾驶舱
+需求标识,option_e
+表名,ads_multi_dimension_analysis
+中文表名,多维度交叉分析表
+层级,ADS
+创建日期,2026-06-11
+
+字段名,数据类型,中文注释,是否主键,是否可空,默认值,计算逻辑
+stat_date,VARCHAR(20),统计日期,是,否,,
+dimension_type,VARCHAR(50),维度类型,是,否,,region/product/risk/customer_level
+dimension_value,VARCHAR(100),维度值,是,否,,具体维度值
+customer_count,INT,客户数,否,否,,COUNT(DISTINCT customer_id)
+aum,DECIMAL(18;2),AUM,否,是,,SUM(holding_market_value + account_balance)
+transaction_amount,DECIMAL(18;2),交易额,否,是,,SUM(amount)
+purchase_amount,DECIMAL(18;2),申购金额,否,是,,SUM(CASE WHEN transaction_type = 'purchase' THEN amount)
+redemption_amount,DECIMAL(18;2),赎回金额,否,是,,SUM(CASE WHEN transaction_type = 'redemption' THEN amount)
+avg_aum_per_customer,DECIMAL(18;2),户均AUM,否,是,,aum / customer_count
+avg_transaction_per_customer,DECIMAL(18;2),户均交易额,否,是,,transaction_amount / customer_count
+dm_src_info,VARCHAR(100),数据来源表,否,否,,'dwd_customer_asset_daily'
+etl_load_time,DATETIME,ETL加载时间,否,否,,NOW()
+
+加工逻辑项,说明
+数据来源,"dwd_customer_asset_daily, ods_transaction, ods_customer, ods_product"
+关联条件,按维度字段GROUP BY
+过滤条件,is_current = 1
+聚合粒度,stat_date + dimension_type + dimension_value
+更新策略,"全量刷新，日频"
+ETL脚本,etl/etl_ads_multi_dimension_analysis.sql

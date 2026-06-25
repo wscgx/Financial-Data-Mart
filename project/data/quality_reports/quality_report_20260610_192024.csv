@@ -1,0 +1,15 @@
+﻿check_name,description,failed_records,status,check_time
+dwd_negative_aum,DWD层-检查AUM是否为负数,0,通过,2026-06-10 19:20:24
+dwd_invalid_date,DWD层-检查日期是否合理,0,通过,2026-06-10 19:20:24
+dwd_null_customer_id,DWD层-检查客户ID是否为空,0,通过,2026-06-10 19:20:24
+dws_invalid_value_level,DWS层-检查客户价值等级是否合理,0,通过,2026-06-10 19:20:24
+dws_aum_mismatch,DWS层-检查AUM计算是否正确,0,通过,2026-06-10 19:20:24
+ads_ranking_gap,ADS层-检查排名是否连续,0,通过,2026-06-10 19:20:24
+dwd_dws_aum_mismatch,跨层校验-DWD汇总与DWS对比,0,通过,2026-06-10 19:20:24
+missing_customer_aum,完整性校验-检查是否有客户缺失AUM数据,365,失败,2026-06-10 19:20:24
+dwd_negative_sales_amount,DWD层-检查产品销售金额是否为负数,0,通过,2026-06-10 19:20:24
+dwd_null_product_id,DWD层-检查产品ID是否为空,0,通过,2026-06-10 19:20:24
+dwd_net_purchase_mismatch,DWD层-检查净申购金额计算是否正确,0,通过,2026-06-10 19:20:24
+dws_decreasing_total_sales,DWS层-检查累计销售额是否递减,0,通过,2026-06-10 19:20:24
+ads_sales_share_sum_invalid,ADS层-检查销售占比总和是否接近1,0,通过,2026-06-10 19:20:24
+ads_branch_ranking_gap,ADS层-检查排名是否连续,0,通过,2026-06-10 19:20:24

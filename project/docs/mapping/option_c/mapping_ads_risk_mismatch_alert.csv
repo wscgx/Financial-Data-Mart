@@ -1,0 +1,33 @@
+字段,值
+需求名称,客户风险匹配度分析
+需求标识,option_c
+表名,ads_risk_mismatch_alert
+中文表名,风险错配预警清单表
+层级,ADS
+创建日期,2026-06-11
+
+字段名,数据类型,中文注释,是否主键,是否可空,默认值,计算逻辑
+stat_date,VARCHAR(20),统计日期,是,否,,d.stat_date
+alert_id,VARCHAR(50),预警ID,是,否,,CONCAT('ALERT_', stat_date, '_', customer_id, '_', holding_id)
+customer_id,VARCHAR(50),客户ID,否,否,,d.customer_id
+customer_name,VARCHAR(100),客户姓名,否,是,,CONCAT(c.last_name, c.first_name)
+customer_risk_level,VARCHAR(20),客户风险等级,否,是,,d.customer_risk_level
+product_id,VARCHAR(50),产品ID,否,否,,d.product_id
+product_name,VARCHAR(200),产品名称,否,否,,d.product_name
+product_risk_level,VARCHAR(20),产品风险等级,否,否,,d.product_risk_level
+risk_gap,INT,风险等级差距,否,否,,d.risk_gap
+holding_market_value,DECIMAL(18;2),持仓市值,否,是,,d.holding_market_value
+assessment_valid_until,VARCHAR(20),测评有效期至,否,是,,d.assessment_valid_until
+alert_type,VARCHAR(50),预警类型,否,否,,CASE WHEN mismatch AND expired THEN 'both' WHEN mismatch THEN 'mismatch' WHEN expired THEN 'expired'
+alert_level,VARCHAR(20),预警级别,否,否,,CASE WHEN risk_gap >= 3 THEN 'high' WHEN risk_gap >= 2 THEN 'medium' ELSE 'low'
+alert_message,TEXT,预警信息,否,否,,CONCAT预警消息文本
+dm_src_info,VARCHAR(100),数据来源表,否,否,,'dwd_customer_risk_match'
+etl_load_time,DATETIME,ETL加载时间,否,否,,NOW()
+
+加工逻辑项,说明
+数据来源,"dwd_customer_risk_match, ods_customer"
+关联条件,dwd_customer_risk_match.customer_id = ods_customer.customer_id
+过滤条件,"risk_match_flag = 'mismatch' OR assessment_valid_until < CURDATE()"
+聚合粒度,stat_date + alert_id
+更新策略,"全量刷新，日频"
+ETL脚本,etl/etl_ads_risk_mismatch_alert.sql

@@ -1,0 +1,35 @@
+字段,值
+需求名称,综合财富管理驾驶舱
+需求标识,option_e
+表名,dws_platform_daily_summary
+中文表名,平台日汇总宽表
+层级,DWS
+创建日期,2026-06-11
+
+字段名,数据类型,中文注释,是否主键,是否可空,默认值,计算逻辑
+stat_date,VARCHAR(20),统计日期,是,否,,
+total_customers,INT,总客户数,否,否,,COUNT(DISTINCT customer_id)
+active_customers,INT,活跃客户数,否,否,,COUNT(DISTINCT CASE WHEN holding_market_value > 0 OR account_balance > 0 THEN customer_id)
+total_aum,DECIMAL(18;2),平台总AUM,否,是,,SUM(holding_market_value + account_balance)
+avg_daily_aum,DECIMAL(18;2),日均AUM,否,是,,AVG(holding_market_value + account_balance)
+total_transaction_amount,DECIMAL(18;2),总交易额,否,是,,SUM(amount)
+total_purchase_amount,DECIMAL(18;2),总申购金额,否,是,,SUM(CASE WHEN transaction_type = 'purchase' THEN amount)
+total_redemption_amount,DECIMAL(18;2),总赎回金额,否,是,,SUM(CASE WHEN transaction_type = 'redemption' THEN amount)
+net_purchase_amount,DECIMAL(18;2),净申购金额,否,是,,total_purchase_amount - total_redemption_amount
+total_products,INT,产品总数,否,否,,COUNT(*)
+active_products,INT,在售产品数,否,否,,COUNT(CASE WHEN status = 'active' THEN 1)
+holding_customers,INT,有持仓客户数,否,否,,COUNT(DISTINCT CASE WHEN holding_market_value > 0 THEN customer_id)
+product_coverage_rate,DECIMAL(5;4),产品覆盖率,否,是,,holding_customers / total_customers
+new_customers,INT,新增客户数,否,否,,COUNT(CASE WHEN rn = 1 THEN customer_id)
+churn_customers,INT,流失客户数,否,否,,COUNT(CASE WHEN days_since_last > 90 THEN customer_id)
+net_customer_growth,INT,客户净增数,否,是,,new_customers - churn_customers
+dm_src_info,VARCHAR(100),数据来源表,否,否,,'dwd_customer_asset_daily'
+etl_load_time,DATETIME,ETL加载时间,否,否,,NOW()
+
+加工逻辑项,说明
+数据来源,"dwd_customer_asset_daily, ods_transaction, ods_product"
+关联条件,按stat_date LEFT JOIN各子查询
+过滤条件,is_current = 1
+聚合粒度,stat_date
+更新策略,"全量刷新，日频"
+ETL脚本,etl/etl_dws_platform_daily_summary.sql

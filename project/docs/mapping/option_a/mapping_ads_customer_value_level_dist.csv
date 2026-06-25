@@ -1,0 +1,30 @@
+﻿字段,值
+需求名称,客户资产价值分析体系
+需求标识,option_a
+表名,ads_customer_value_level_dist
+中文表名,客户价值等级分布表
+层级,ADS
+创建日期,2026-06-10
+最后更新,2026-06-10
+
+字段名,数据类型,中文注释,是否主键,是否可空,默认值,计算逻辑
+stat_date,VARCHAR(20),统计日期,是,否,,
+customer_value_level,VARCHAR(30),客户价值等级,是,否,,
+level_name,VARCHAR(30),等级名称,否,否,,CASE WHEN high_net_worth THEN 高净值客户 WHEN middle THEN 中端客户 ELSE 普通客户 END
+customer_count,INT,客户数,否,否,,COUNT(*)
+total_aum,"DECIMAL(18,2)",总AUM,否,否,,SUM(total_aum)
+avg_aum,"DECIMAL(18,2)",平均AUM,否,否,,AVG(total_aum)
+min_aum,"DECIMAL(18,2)",最小AUM,否,否,,MIN(total_aum)
+max_aum,"DECIMAL(18,2)",最大AUM,否,否,,MAX(total_aum)
+aum_percentage,"DECIMAL(8,4)",AUM占比(%),否,否,,SUM(total_aum) * 100 / 总AUM
+customer_percentage,"DECIMAL(8,4)",客户占比(%),否,否,,COUNT(*) * 100 / 总客户数
+dm_src_info,VARCHAR(100),数据来源表,否,否,,'dws_customer_value_profile'
+etl_load_time,DATETIME,ETL加载时间,否,否,,NOW()
+
+加工逻辑项,说明
+数据来源,dws_customer_value_profile
+关联条件,无（单表聚合）
+过滤条件,stat_date = MAX(stat_date)
+聚合粒度,stat_date + customer_value_level
+更新策略,全量刷新，日频
+ETL脚本,etl/etl_ads_customer_value_level_dist.sql

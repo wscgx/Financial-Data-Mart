@@ -1,0 +1,34 @@
+﻿字段,值
+需求名称,产品销售与业绩分析
+需求标识,option_b
+表名,dws_product_performance
+中文表名,产品业绩宽表
+层级,DWS
+创建日期,2026-06-10
+最后更新,2026-06-10
+
+字段名,数据类型,中文注释,是否主键,是否可空,默认值,计算逻辑
+stat_date,VARCHAR(20),统计日期,是,否,,
+product_id,VARCHAR(50),产品ID,是,否,,
+product_name,VARCHAR(100),产品名称,否,否,,
+product_type,VARCHAR(50),产品类型,否,否,,
+risk_level,VARCHAR(30),风险等级,否,否,,
+manager,VARCHAR(50),基金经理,否,否,,
+total_sales_amount,"DECIMAL(18,2)",累计销售金额,否,否,,SUM(purchase_amount) OVER (PARTITION BY product_id ORDER BY stat_date)
+total_redemption_amount,"DECIMAL(18,2)",累计赎回金额,否,否,,SUM(redemption_amount) OVER (PARTITION BY product_id ORDER BY stat_date)
+net_sales_amount,"DECIMAL(18,2)",净销售金额,否,否,,SUM(net_purchase_amount) OVER (PARTITION BY product_id ORDER BY stat_date)
+total_customer_count,INT,累计交易客户数,否,否,,SUM(customer_count) OVER (PARTITION BY product_id ORDER BY stat_date)
+avg_daily_sales,"DECIMAL(18,2)",日均销售额,否,否,,AVG(purchase_amount) OVER (7日滑动窗口)
+weekly_sales_amount,"DECIMAL(18,2)",本周销售额,否,否,,SUM(purchase_amount) OVER (7日滑动窗口)
+monthly_sales_amount,"DECIMAL(18,2)",本月销售额,否,否,,SUM(purchase_amount) OVER (30日滑动窗口)
+expected_return,"DECIMAL(8,4)",预期收益率,否,否,,
+dm_src_info,VARCHAR(100),数据来源表,否,否,,'dwd_product_sales_daily'
+etl_load_time,DATETIME,ETL加载时间,否,否,,NOW()
+
+加工逻辑项,说明
+数据来源,"dwd_product_sales_daily, ods_product"
+关联条件,dwd_product_sales_daily.product_id = ods_product.product_id
+过滤条件,stat_date IS NOT NULL
+聚合粒度,stat_date + product_id
+更新策略,全量刷新，日频
+ETL脚本,etl/etl_dws_product_performance.sql

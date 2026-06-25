@@ -1,0 +1,29 @@
+字段,值
+需求名称,产品销售与业绩分析
+需求标识,option_b
+表名,ads_branch_sales_ranking
+中文表名,网点销售排名表
+层级,ADS
+创建日期,2026-06-10
+最后更新,2026-06-10
+
+字段名,数据类型,中文注释,是否主键,是否可空,默认值,计算逻辑
+stat_date,VARCHAR(20),统计日期,是,否,,
+branch,VARCHAR(50),网点名称,是,否,,
+total_sales_amount,DECIMAL(18,2),销售总额,否,是,SUM(CASE WHEN transaction_type = 'purchase' THEN amount ELSE 0 END)
+total_redemption_amount,DECIMAL(18,2),赎回总额,否,是,SUM(CASE WHEN transaction_type = 'redemption' THEN amount ELSE 0 END)
+net_sales_amount,DECIMAL(18,2),净销售额,否,是,total_sales_amount - total_redemption_amount
+transaction_count,INT,交易笔数,否,是,COUNT(transaction_id)
+customer_count,INT,交易客户数,否,是,COUNT(DISTINCT customer_id)
+sales_ranking,INT,销售排名,否,是,RANK() OVER (PARTITION BY stat_date ORDER BY total_sales_amount DESC)
+sales_share,DECIMAL(8,4),销售占比,否,是,total_sales_amount / SUM(total_sales_amount) OVER (PARTITION BY stat_date)
+dm_src_info,VARCHAR(100),数据来源表,否,是,'ods_transaction'
+etl_load_time,DATETIME,ETL加载时间,否,是,NOW()
+
+加工逻辑项,说明
+数据来源,"ods_transaction, ods_account"
+关联条件,ods_transaction.account_id = ods_account.account_id
+过滤条件,"transaction_type IN ('purchase', 'redemption') AND is_current = 1"
+聚合粒度,transaction_date + branch
+更新策略,"全量刷新，日频"
+ETL脚本,etl/etl_ads_branch_sales_ranking.sql

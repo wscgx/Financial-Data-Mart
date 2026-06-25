@@ -1,0 +1,24 @@
+字段,值
+需求名称,客户风险匹配度分析
+需求标识,option_c
+表名,ads_risk_metrics_daily
+中文表名,风险指标日汇总表
+层级,ADS
+创建日期,2026-06-11
+
+字段名,数据类型,中文注释,是否主键,是否可空,默认值,计算逻辑
+stat_date,VARCHAR(20),统计日期,是,否,,各源表stat_date
+metric_name,VARCHAR(100),指标名称,是,否,,指标英文名
+metric_value,DECIMAL(18;4),指标值,否,否,,按指标定义计算
+metric_type,VARCHAR(20),指标类型,否,否,,count/rate/amount
+dm_src_info,VARCHAR(100),数据来源表,否,否,,主要来源表名
+etl_load_time,DATETIME,ETL加载时间,否,否,,NOW()
+
+加工逻辑项,说明
+数据来源,"dwd_customer_risk_match, dws_risk_compliance_summary, ads_risk_mismatch_alert"
+关联条件,按stat_date分组聚合
+过滤条件,按各指标定义的WHERE条件
+聚合粒度,stat_date + metric_name
+更新策略,"全量刷新，日频"
+ETL脚本,etl/etl_ads_risk_metrics_daily.sql
+指标清单,"1.风险错配客户数 2.测评过期率 3.高风险产品持有率 4.风险错配持仓数 5.风险错配持仓市值 6.合规客户占比 7.预警客户数 8.违规客户数 9.平均风险差距 10.高风险预警数"

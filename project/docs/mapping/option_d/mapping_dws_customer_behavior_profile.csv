@@ -1,0 +1,38 @@
+字段,值
+需求名称,客户交易行为分析
+需求标识,option_d
+表名,dws_customer_behavior_profile
+中文表名,客户行为画像宽表
+层级,DWS
+创建日期,2026-06-11
+
+字段名,数据类型,中文注释,是否主键,是否可空,默认值,计算逻辑
+stat_date,VARCHAR(20),统计日期,是,否,,d.stat_date
+customer_id,VARCHAR(50),客户ID,是,否,,d.customer_id
+customer_name,VARCHAR(100),客户姓名,否,是,,CONCAT(c.last_name, c.first_name)
+city,VARCHAR(50),城市,否,是,,d.city
+branch,VARCHAR(100),网点,否,是,,d.branch
+total_transaction_count,INT,总交易笔数,否,否,,SUM(transaction_count)
+total_purchase_amount,DECIMAL(18;2),总申购金额,否,是,,SUM(purchase_amount)
+total_redemption_amount,DECIMAL(18;2),总赎回金额,否,是,,SUM(redemption_amount)
+avg_transaction_amount,DECIMAL(18;2),平均交易金额,否,是,,AVG(net_amount / NULLIF(transaction_count, 0))
+max_transaction_amount,DECIMAL(18;2),最大单笔交易金额,否,是,,子查询获取最大值
+transaction_frequency,DECIMAL(10;2),交易频率(笔/月),否,是,,总笔数/天数*30
+preferred_product_type,VARCHAR(100),偏好产品类型,否,是,,子查询获取最多交易的产品类型
+preferred_transaction_hour,INT,偏好交易时段,否,是,,默认10
+large_transaction_count,INT,大额交易笔数,否,否,,SUM(CASE WHEN purchase_amount > 50000 THEN transaction_count ELSE 0)
+large_transaction_amount,DECIMAL(18;2),大额交易总额,否,是,,SUM(CASE WHEN purchase_amount > 50000 THEN purchase_amount ELSE 0)
+last_transaction_date,VARCHAR(20),最后交易日期,否,是,,MAX(last_transaction_date)
+days_inactive,INT,未交易天数,否,否,,DATEDIFF(stat_date, MAX(last_transaction_date))
+churn_risk_level,VARCHAR(20),流失风险等级,否,否,,CASE WHEN days_inactive > 7 THEN 'high' WHEN > 3 THEN 'medium' WHEN > 1 THEN 'low' ELSE 'none'
+asset_trend,VARCHAR(20),资产趋势,否,否,,CASE WHEN SUM(net_amount) < 0 THEN 'decreasing' WHEN > 0 THEN 'increasing' ELSE 'stable'
+dm_src_info,VARCHAR(100),数据来源表,否,否,,'dwd_customer_activity_daily'
+etl_load_time,DATETIME,ETL加载时间,否,否,,NOW()
+
+加工逻辑项,说明
+数据来源,"dwd_customer_activity_daily, ods_customer"
+关联条件,dwd_customer_activity_daily.customer_id = ods_customer.customer_id
+过滤条件,ods_customer.is_current = 1
+聚合粒度,stat_date + customer_id
+更新策略,"全量刷新，日频"
+ETL脚本,etl/etl_dws_customer_behavior_profile.sql

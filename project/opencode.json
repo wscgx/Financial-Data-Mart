@@ -1,0 +1,63 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "project_name": "AI Financial Analytics Platform",
+  "version": "1.0.0",
+  "description": "AI-driven financial data warehouse and analytics platform",
+  "plugin": ["superpowers@git+https://github.com/obra/superpowers.git"],
+  "permission": {
+    "bash": {
+      "rm *": "deny",
+      "rmdir *": "deny",
+      "del *": "deny",
+      "Remove-Item *": "deny",
+      "*": "allow"
+    },
+    "edit": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "task": "allow",
+    "external_directory": "allow",
+    "todowrite": "allow",
+    "question": "allow",
+    "webfetch": "allow",
+    "skill": "allow"
+  },
+  "agents": {
+    "data_architect": {
+      "enabled": true,
+      "prompt_template": "agents/data_architect/prompt.md"
+    },
+    "etl_developer": {
+      "enabled": true,
+      "prompt_template": "agents/etl_developer/prompt.md"
+    },
+    "indicator_designer": {
+      "enabled": true,
+      "prompt_template": "agents/indicator_designer/prompt.md"
+    },
+    "data_quality": {
+      "enabled": true,
+      "prompt_template": "agents/data_quality/prompt.md"
+    },
+    "bi_analyst": {
+      "enabled": true,
+      "prompt_template": "agents/bi_analyst/prompt.md"
+    },
+    "warehouse_copilot": {
+      "enabled": true,
+      "prompt_template": "agents/warehouse_copilot/prompt.md"
+    }
+  },
+  "knowledge_base": {
+    "metrics": "knowledge_base/metrics/",
+    "dimensions": "knowledge_base/dimensions/",
+    "model_specs": "knowledge_base/model_specs/",
+    "sql_templates": "knowledge_base/sql_templates/",
+    "quality_rules": "knowledge_base/quality_rules/"
+  },
+  "data_warehouse": {
+    "layers": ["ods", "dwd", "dws", "ads"],
+    "sql_dir": "sql/"
+  }
+}

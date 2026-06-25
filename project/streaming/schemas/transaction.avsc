@@ -1,0 +1,23 @@
+{
+  "namespace": "com.financialdw.schemas",
+  "type": "record",
+  "name": "Transaction",
+  "doc": "金融交易消息 Schema",
+  "fields": [
+    {"name": "transaction_id", "type": "string", "doc": "交易ID"},
+    {"name": "account_id", "type": "string", "doc": "账户ID"},
+    {"name": "customer_id", "type": "string", "doc": "客户ID"},
+    {"name": "product_id", "type": "string", "doc": "产品ID"},
+    {"name": "product_name", "type": "string", "doc": "产品名称"},
+    {"name": "product_type", "type": "string", "doc": "产品类型"},
+    {"name": "risk_level", "type": "string", "doc": "风险等级"},
+    {"name": "transaction_type", "type": "string", "doc": "交易类型(purchase/redemption)"},
+    {"name": "amount", "type": "double", "doc": "交易金额"},
+    {"name": "price", "type": "double", "doc": "交易价格"},
+    {"name": "quantity", "type": "double", "doc": "交易数量"},
+    {"name": "fee", "type": "double", "doc": "手续费"},
+    {"name": "branch", "type": "string", "doc": "网点"},
+    {"name": "transaction_time", "type": "string", "doc": "交易时间"},
+    {"name": "status", "type": "string", "doc": "交易状态"}
+  ]
+}

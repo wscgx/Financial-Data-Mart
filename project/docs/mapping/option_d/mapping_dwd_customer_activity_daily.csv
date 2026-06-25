@@ -1,0 +1,35 @@
+字段,值
+需求名称,客户交易行为分析
+需求标识,option_d
+表名,dwd_customer_activity_daily
+中文表名,客户活跃度日表
+层级,DWD
+创建日期,2026-06-11
+
+字段名,数据类型,中文注释,是否主键,是否可空,默认值,计算逻辑
+stat_date,VARCHAR(20),统计日期,是,否,,t.transaction_date
+customer_id,VARCHAR(50),客户ID,是,否,,a.customer_id
+account_id,VARCHAR(50),账户ID,是,否,,t.account_id
+branch,VARCHAR(100),网点,否,是,,a.branch
+city,VARCHAR(50),城市,否,是,,c.city
+transaction_count,INT,交易笔数,否,否,,COUNT(*)
+purchase_count,INT,申购笔数,否,否,,SUM(CASE WHEN transaction_type = 'purchase' THEN 1 ELSE 0)
+redemption_count,INT,赎回笔数,否,否,,SUM(CASE WHEN transaction_type = 'redemption' THEN 1 ELSE 0)
+purchase_amount,DECIMAL(18;2),申购金额,否,是,,SUM(CASE WHEN transaction_type = 'purchase' THEN amount ELSE 0)
+redemption_amount,DECIMAL(18;2),赎回金额,否,是,,SUM(CASE WHEN transaction_type = 'redemption' THEN amount ELSE 0)
+net_amount,DECIMAL(18;2),净交易金额,否,是,,purchase_amount - redemption_amount
+total_fee,DECIMAL(18;2),总手续费,否,是,,SUM(fee)
+unique_product_count,INT,交易产品数,否,否,,COUNT(DISTINCT product_id)
+product_types,TEXT,交易产品类型列表,否,是,,GROUP_CONCAT(DISTINCT product_type)
+last_transaction_date,VARCHAR(20),最后交易日期,否,是,,MAX(transaction_date)
+days_since_last_transaction,INT,距最后交易天数,否,否,,0
+dm_src_info,VARCHAR(100),数据来源表,否,否,,'ods_transaction'
+etl_load_time,DATETIME,ETL加载时间,否,否,,NOW()
+
+加工逻辑项,说明
+数据来源,"ods_transaction, ods_account, ods_customer, ods_product"
+关联条件,"ods_transaction.account_id = ods_account.account_id; ods_account.customer_id = ods_customer.customer_id; ods_transaction.product_id = ods_product.product_id"
+过滤条件,"ods_transaction.is_current = 1; ods_transaction.status = 'success'; ods_account.is_current = 1; ods_customer.is_current = 1"
+聚合粒度,transaction_date + customer_id + account_id
+更新策略,"全量刷新，日频"
+ETL脚本,etl/etl_dwd_customer_activity_daily.sql

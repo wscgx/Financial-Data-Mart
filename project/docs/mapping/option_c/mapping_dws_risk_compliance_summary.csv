@@ -1,0 +1,34 @@
+字段,值
+需求名称,客户风险匹配度分析
+需求标识,option_c
+表名,dws_risk_compliance_summary
+中文表名,合规风险汇总表
+层级,DWS
+创建日期,2026-06-11
+
+字段名,数据类型,中文注释,是否主键,是否可空,默认值,计算逻辑
+stat_date,VARCHAR(20),统计日期,是,否,,d.stat_date
+customer_id,VARCHAR(50),客户ID,是,否,,d.customer_id
+customer_name,VARCHAR(100),客户姓名,否,是,,CONCAT(c.last_name, c.first_name)
+customer_risk_level,VARCHAR(20),客户风险等级,否,是,,d.customer_risk_level
+assessment_status,VARCHAR(20),测评状态,否,是,,d.assessment_status
+assessment_valid_until,VARCHAR(20),测评有效期至,否,是,,d.assessment_valid_until
+is_assessment_expired,VARCHAR(10),测评是否过期,否,否,,CASE WHEN assessment_valid_until < CURDATE() THEN 'yes' ELSE 'no'
+total_holding_count,INT,总持仓产品数,否,否,,COUNT(*)
+mismatch_holding_count,INT,风险错配持仓数,否,否,,SUM(CASE WHEN risk_match_flag = 'mismatch' THEN 1 ELSE 0)
+mismatch_product_ids,TEXT,错配产品ID列表,否,是,,GROUP_CONCAT(CASE WHEN risk_match_flag = 'mismatch' THEN product_id)
+total_holding_market_value,DECIMAL(18;2),总持仓市值,否,是,,SUM(holding_market_value)
+mismatch_holding_market_value,DECIMAL(18;2),错配持仓市值,否,是,,SUM(CASE WHEN risk_match_flag = 'mismatch' THEN holding_market_value ELSE 0)
+mismatch_ratio,DECIMAL(5;4),错配比例,否,否,,mismatch_holding_count / total_holding_count
+max_risk_gap,INT,最大风险等级差距,否,否,,MAX(risk_gap)
+compliance_status,VARCHAR(20),合规状态,否,否,,CASE WHEN mismatch_count = 0 THEN 'compliant' WHEN max_risk_gap <= 1 THEN 'warning' ELSE 'violation'
+dm_src_info,VARCHAR(100),数据来源表,否,否,,'dwd_customer_risk_match'
+etl_load_time,DATETIME,ETL加载时间,否,否,,NOW()
+
+加工逻辑项,说明
+数据来源,"dwd_customer_risk_match, ods_customer"
+关联条件,dwd_customer_risk_match.customer_id = ods_customer.customer_id
+过滤条件,ods_customer.is_current = 1
+聚合粒度,stat_date + customer_id
+更新策略,"全量刷新，日频"
+ETL脚本,etl/etl_dws_risk_compliance_summary.sql
