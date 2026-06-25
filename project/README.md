@@ -1,8 +1,54 @@
-# AI Financial Analytics Platform - 大数据版本
+# Financial Data Mart
 
-## Overview
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![Docker](https://img.shields.io/badge/Docker-24.0-blue.svg)](https://www.docker.com/)
+[![Spark](https://img.shields.io/badge/Apache%20Spark-3.5-orange.svg)](https://spark.apache.org/)
 
-AI-driven financial data warehouse and analytics platform implementing Agent-based architecture for automated data warehouse development. 基于大数据技术栈的金融数据仓库和分析平台。
+> AI-driven financial data warehouse and analytics platform implementing Agent-based architecture for automated data warehouse development.
+
+## Features
+
+- 🏗️ **Lambda 架构** - 批处理 + 实时流处理双模式
+- 📊 **完整数仓分层** - ODS → DWD → DWS → ADS 四层数仓架构
+- 🔄 **自动化 ETL** - Airflow 调度 + Spark/Delta Lake 处理
+- 📈 **实时监控** - Grafana + Prometheus 全链路监控
+- 🤖 **AI Agent** - 多角色 Agent 协作开发数仓
+- 🐳 **一键部署** - Docker Compose 容器化编排
+
+## Quick Start
+
+### 1. 克隆项目
+
+```bash
+git clone https://github.com/wscgx/Financial-Data-Mart.git
+cd Financial-Data-Mart
+```
+
+### 2. 启动服务
+
+```bash
+cd project/docker
+docker compose up -d
+```
+
+### 3. 初始化数据
+
+```bash
+cd project
+pip install -r requirements_bigdata.txt
+python scripts/run_all_etl.py
+```
+
+### 4. 访问服务
+
+| 服务 | 地址 | 说明 |
+|------|------|------|
+| Streamlit | http://localhost:8501 | 数据看板 |
+| Airflow | http://localhost:8080 | ETL 调度 |
+| Spark UI | http://localhost:8083 | 作业监控 |
+| Grafana | http://localhost:3000 | 监控可视化 |
+| MinIO | http://localhost:9001 | 数据湖管理 |
 
 ## Architecture
 
@@ -33,138 +79,51 @@ AI-driven financial data warehouse and analytics platform implementing Agent-bas
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Docker Services
+## Data Warehouse Layers
 
-| Service | Port | Description |
-|---------|------|-------------|
-| MySQL | 3306 | 业务数据库 (financial_dw) |
-| MinIO Console | 9001 | 数据湖管理界面 |
-| MinIO API | 9000 | S3 兼容 API |
-| PostgreSQL | 5432 | Airflow 元数据库 |
-| Airflow | 8080 | ETL 调度 UI |
-| Kafka | 9092 | 消息队列 |
-| Schema Registry | 8081 | Schema 管理 |
-| Flink | 8082 | 流处理引擎 |
-| Spark UI | 8083 | Spark 作业监控 |
-| Jupyter | 8888 | 交互式分析 |
-| Prometheus | 9090 | 监控指标 |
-| Grafana | 3000 | 监控可视化 |
+| 层级 | 说明 | 表数量 |
+|------|------|--------|
+| **ODS** | Operational Data Store - 原始数据层 | 6 |
+| **DWD** | Data Warehouse Detail - 明细层 | 4 |
+| **DWS** | Data Warehouse Summary - 汇总层 | 5 |
+| **ADS** | Application Data Store - 应用层 | 8 |
 
-## Quick Start
+## Tech Stack
 
-### 一键启动 (推荐)
-
-```bash
-# Windows
-.\启动大数据平台.bat
-
-# 或手动启动
-cd project/docker
-docker compose up -d
-```
-
-### 验证服务
-
-```bash
-# 查看服务状态
-docker compose ps
-
-# 访问各服务
-# Streamlit:  http://localhost:8501
-# Spark UI:   http://localhost:8083
-# Jupyter:    http://localhost:8888
-# MinIO:      http://localhost:9001 (minioadmin/minioadmin)
-# Airflow:    http://localhost:8080 (admin/admin)
-# Flink:      http://localhost:8082
-# Grafana:    http://localhost:3000 (admin/admin)
-# Prometheus: http://localhost:9090
-```
-
-### 初始化数据
-
-```bash
-# 安装 Python 依赖
-pip install -r requirements_bigdata.txt
-
-# 执行 ETL 初始化
-cd project
-python scripts/run_all_etl.py
-
-# 或使用 PySpark 版本 (Delta Lake)
-spark-submit etl/spark/etl_ods_to_delta.py
-spark-submit etl/spark/etl_dwd_to_delta.py
-spark-submit etl/spark/etl_dws_to_delta.py
-spark-submit etl/spark/etl_ads_to_delta.py
-spark-submit etl/spark/etl_ads_sync_mysql.py
-```
+| Component | Version | Purpose |
+|-----------|---------|---------|
+| Python | 3.10+ | 主要开发语言 |
+| MySQL | 8.0 | OLTP 查询层 |
+| Spark | 3.5 | 批处理/流处理引擎 |
+| Delta Lake | 3.0.0 | 数据湖格式 |
+| Kafka | 7.5.0 | 消息队列 |
+| Flink | 1.18 | 流处理引擎 |
+| Airflow | 2.9.3 | ETL 调度编排 |
+| MinIO | latest | S3 兼容对象存储 |
+| Streamlit | 1.31+ | 数据看板 |
+| Docker | 24.0 | 容器化部署 |
 
 ## Project Structure
 
 ```
 Financial Data Mart/
-├── .env                              # 环境变量
-├── 启动大数据平台.bat                  # 一键启动
-├── 停止大数据平台.bat                  # 一键停止
-├── 大数据技术栈迁移计划.md             # 迁移计划
-├── 大数据技术栈优化完成.md             # 优化完成文档
-├── 大数据平台快速参考.md               # 快速参考
-└── project/
-    ├── app.py                        # Streamlit 入口
-    ├── configs/
-    │   └── spark_config.py           # Spark/MinIO/Delta/Kafka 配置
-    ├── docker/
-    │   ├── docker-compose.yml        # Docker 服务编排
-    │   ├── .env                      # 环境变量
-    │   ├── airflow/
-    │   │   ├── dags/
-    │   │   │   ├── financial_etl_dag.py
-    │   │   │   └── financial_etl_dag_delta.py
-    │   │   └── requirements.txt
-    │   └── monitoring/
-    │       ├── prometheus.yml
-    │       └── grafana/provisioning/
-    ├── etl/
-    │   ├── spark/
-    │   │   ├── common.py
-    │   │   ├── etl_ods_to_delta.py
-    │   │   ├── etl_dwd_to_delta.py
-    │   │   ├── etl_dwd_customer_asset_daily.py
-    │   │   ├── etl_dws_to_delta.py
-    │   │   ├── etl_dws_customer_value_profile.py
-    │   │   ├── etl_ads_to_delta.py
-    │   │   └── etl_ads_sync_mysql.py
-    │   └── *.sql
-    ├── streaming/
-    │   ├── kafka_producer.py
-    │   ├── flink_realtime_agg.py
-    │   ├── spark_streaming_agg.py
-    │   └── schemas/
-    ├── scripts/
-    │   ├── run_all_etl.py
-    │   ├── etl_metrics_exporter.py
-    │   └── run_quality_validation.py
-    └── dashboards/
-```
-
-## Data Warehouse Layers
-
-- **ODS**: Operational Data Store (6 tables) - 原始数据层
-- **DWD**: Data Warehouse Detail (4 tables) - 明细层
-- **DWS**: Data Warehouse Summary (5 tables) - 汇总层
-- **ADS**: Application Data Store (8 tables) - 应用层
-
-## ETL Pipeline
-
-### 批处理 ETL (每日执行)
-
-```
-MySQL ODS → Delta Lake ODS → Delta Lake DWD → Delta Lake DWS → Delta Lake ADS → MySQL ADS
-```
-
-### 实时流处理
-
-```
-Kafka → Flink/Spark Streaming → Delta Lake → MySQL
+├── project/
+│   ├── app.py                  # Streamlit 入口
+│   ├── configs/                # 配置文件
+│   ├── docker/                 # Docker 编排
+│   │   └── docker-compose.yml
+│   ├── etl/                    # ETL 脚本
+│   │   ├── *.sql               # SQL 脚本
+│   │   └── spark/              # PySpark 脚本
+│   ├── sql/                    # DDL 建表语句
+│   │   ├── ods/
+│   │   ├── dwd/
+│   │   ├── dws/
+│   │   └── ads/
+│   ├── dashboards/             # 可视化看板
+│   ├── scripts/                # 工具脚本
+│   └── tests/                  # 测试文件
+└── scripts/                    # 启动脚本
 ```
 
 ## Business Domains
@@ -175,52 +134,10 @@ Kafka → Flink/Spark Streaming → Delta Lake → MySQL
 - **资产域**: 资产快照、资产变动
 - **风险域**: 风险匹配、风险预警
 
-## Tech Stack
+## Contributing
 
-| Component | Version | Purpose |
-|-----------|---------|---------|
-| MySQL | 8.0 | OLTP 查询层 |
-| MinIO | latest | S3 兼容对象存储 |
-| PostgreSQL | 15 | Airflow 元数据库 |
-| Airflow | 2.9.3 | ETL 调度编排 |
-| Kafka | 7.5.0 | 消息队列 |
-| Schema Registry | 7.5.0 | Schema 管理 |
-| Flink | 1.18 | 流处理引擎 |
-| Spark | 3.5 | 批处理/流处理引擎 |
-| Jupyter | latest | 交互式分析 |
-| Prometheus | latest | 指标采集 |
-| Grafana | latest | 监控可视化 |
-| Delta Lake | 3.0.0 | 数据湖格式 |
-| Streamlit | latest | 数据看板 |
+欢迎贡献代码！请查看 [CONTRIBUTING.md](../CONTRIBUTING.md) 了解详情。
 
-## Monitoring
+## License
 
-### Grafana Dashboard
-
-- **ETL 监控面板**: 任务总数、成功/失败数、处理行数
-- **实时流处理监控**: Kafka 消息数、Flink 作业状态
-- **系统资源监控**: CPU、内存、磁盘使用率
-
-### Prometheus Metrics
-
-- `etl_task_total`: ETL 任务总数
-- `etl_task_success`: ETL 任务成功数
-- `etl_task_failed`: ETL 任务失败数
-- `etl_rows_processed_total`: ETL 处理总行数
-- `mysql_connection_status`: MySQL 连接状态
-- `minio_connection_status`: MinIO 连接状态
-- `kafka_messages_total`: Kafka 消息总数
-
-## Getting Started
-
-1. 启动 Docker 服务: `.\启动大数据平台.bat`
-2. 配置 Agent 提示词: `agents/` 目录
-3. 初始化知识库: `knowledge_base/`
-4. 执行 ETL 流水线: `python scripts/run_all_etl.py`
-5. 访问 Streamlit 看板: `python app.py`
-
-## Documentation
-
-- [大数据技术栈迁移计划](大数据技术栈迁移计划.md)
-- [大数据技术栈优化完成](大数据技术栈优化完成.md)
-- [大数据平台快速参考](大数据平台快速参考.md)
+本项目采用 [MIT License](../LICENSE) 开源协议。
